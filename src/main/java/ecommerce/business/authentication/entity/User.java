@@ -1,15 +1,24 @@
 package ecommerce.business.authentication.entity;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import ecommerce.utils.IException;
 import ecommerce.utils.Validator;
 
 @Document("Users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     private UUID id;
@@ -18,8 +27,10 @@ public class User {
     private String mobilePhone;
     private String homePhone;
     private String email;
+    private String password;
 
-    public User(UUID id, String name, String document, String mobilePhone, String homePhone, String email) {
+    public User(UUID id, String name, String document, String mobilePhone, String homePhone, String email,
+            String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         if (id == null) {
             this.id = UUID.randomUUID();
         } else {
@@ -30,6 +41,7 @@ public class User {
         this.mobilePhone = mobilePhone;
         this.homePhone = homePhone;
         this.email = email;
+        this.password = encriptPassword(password);
     }
 
     public UUID getId() {
@@ -56,13 +68,48 @@ public class User {
         return this.email;
     }
 
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
     public static void validate(User user) {
         if (Validator.isNullOrEmpty(user.getName())) {
             throw IException.ofValidation("USER_NAME_INVALID", "Nome do usuário inválido.");
         }
 
         if (Validator.isNullOrEmpty(user.getDocument())) {
-            throw IException.ofValidation("USER_DOCUMENT_INVALID", "Documento do usário inválido");
+            throw IException.ofValidation("USER_DOCUMENT_INVALID", "Documento do usuário inválido");
         }
 
         if (Validator.isNullOrEmpty(user.getEmail())) {
@@ -76,6 +123,12 @@ public class User {
         if (Validator.isNullOrEmpty(user.getHomePhone())) {
             throw IException.ofValidation("HOME_PHONE_INVALID", "Número residencial inválido.");
         }
+    }
+
+    public static String encriptPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest messageDigest =  MessageDigest.getInstance("SHA-256");
+        messageDigest.update(password.getBytes("UTF-8"));
+        return new BigInteger(1, messageDigest.digest()).toString(16);
     }
 
 }

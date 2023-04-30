@@ -31,7 +31,7 @@ public class EcommerceProductsController extends BaseController {
         this.productService = productService;
     }
 
-    @PostMapping("register")
+    @PostMapping("/register")
     public CompletableFuture<ApiReturn<EcommerceProduct>> registerProduct(
             @RequestBody EcommerceProduct productDetails) {
         return asyncResultOf(() -> this.productService.registerProduct(productDetails));
@@ -50,7 +50,7 @@ public class EcommerceProductsController extends BaseController {
         return asyncResultOf(() -> this.productService.findProductById(productId));
     }
 
-    @PutMapping("update/{productId}")
+    @PutMapping("/update/{productId}")
     public CompletableFuture<ApiReturn<Boolean>> updateProduct(@PathVariable UUID productId,
             @RequestBody ResumedEcommerceProduct productDetails) {
         return asyncResultOf(() -> this.productService.updateProduct(productDetails, productId));

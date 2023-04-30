@@ -2,12 +2,12 @@ package ecommerce.controllers;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ecommerce.business.authentication.entity.Login;
 import ecommerce.business.authentication.entity.User;
 import ecommerce.business.authentication.service.UserService;
 import ecommerce.utils.ApiReturn;
@@ -22,9 +22,15 @@ public class UserAuthenticationController extends BaseController {
         super(executor);
         this.userService = userService;
     }
-
-    @PostMapping("sign")
-    public CompletableFuture<ApiReturn<User>> signUser(@RequestBody User user) {
-        return asyncResultOf(() -> this.userService.singUser(user));
+    
+    @PostMapping("/sign")
+    public CompletableFuture<ApiReturn<User>> createUser(@RequestBody User user) {
+        return asyncResultOf(() -> this.userService.createUser(user));
     }
+
+    @PostMapping("/login")
+    public CompletableFuture<ApiReturn<String>> login(@RequestBody Login login) {
+        return asyncResultOf(() -> this.userService.login(login));
+    }
+
 }

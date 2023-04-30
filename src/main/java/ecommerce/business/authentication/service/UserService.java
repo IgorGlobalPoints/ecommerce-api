@@ -1,15 +1,15 @@
 package ecommerce.business.authentication.service;
 
-import java.io.Console;
-
 import org.slf4j.Logger;
 
 import org.slf4j.LoggerFactory;
-import org.springframework.data.mongodb.core.aggregation.SetWindowFieldsOperation.SetWindowFieldsOperationBuilder.As;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 
+import ecommerce.business.authentication.entity.Login;
 import ecommerce.business.authentication.entity.User;
-import ecommerce.business.authentication.entity.UserResumed;
 import ecommerce.business.authentication.repository.UserRepository;
 import ecommerce.utils.IException;
 
@@ -18,12 +18,14 @@ public class UserService {
     private static final Logger LOG = LoggerFactory.getLogger(User.class);
 
     private final UserRepository userRepository;
+    private AuthenticationManager authenticationManager;
+    private TokenService tokenService;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public User singUser(User user) {
+    public User createUser(User user) {
         if (user == null) {
             throw IException.ofValidation("USER_INVALID", "Usuário inválido.");
         }
@@ -39,20 +41,30 @@ public class UserService {
         }
 
         if (userInfo != null) {
-            return userInfo;
-            // return new User(userInfo.getId(), userInfo.getName(), userInfo.getDocument(),
-            // userInfo.getMobilePhone(),
-            // userInfo.getHomePhone(), userInfo.getEmail());
+            throw IException.ofValidation("USER_CREATE_ERROR", "Documento já cadastrado.");
         }
 
-        User savedUser;
         try {
-            savedUser = this.userRepository.createUser(user);
+            userInfo = this.userRepository.createUser(user);
         } catch (RuntimeException ex) {
             LOG.error("Ocorreu um erro ao cadatrar novo usuário", ex);
-            throw IException.ofValidation("ERROR_REGISTER_USER", "Erro ao registrar usuário.");
+            throw IException.ofValidation("USER_CREATE_ERROR", "Erro ao registrar usuário.");
         }
 
-        return savedUser;
+        return userInfo;
+    }
+
+    public String login(Login login) {
+
+        Login.validate(login);
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                login.getEmail(), login.getPassword());
+
+        Authentication authenticate = this.authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+
+        var user = (User) authenticate.getPrincipal();
+
+        return tokenService.genarateToken(user);
     }
 }

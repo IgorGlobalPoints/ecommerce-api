@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 
 import ecommerce.business.authentication.entity.User;
-import ecommerce.business.authentication.entity.UserResumed;
 
 @Repository
 public class UserRepository {
@@ -25,7 +24,12 @@ public class UserRepository {
         var query = new Query().addCriteria(where("document").is(document));
 
         return mongoTemplate.findOne(query, User.class);
+    }
 
+    public User findUserByUsername(String username) {
+        var query = new Query().addCriteria(where("email").is(username));
+
+        return mongoTemplate.findOne(query, User.class);
     }
 
 }
