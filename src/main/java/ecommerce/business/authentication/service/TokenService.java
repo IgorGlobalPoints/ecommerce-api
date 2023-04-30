@@ -18,7 +18,7 @@ public class TokenService {
         Date expiryDate = Date.from(expiryTime.atZone(ZoneId.systemDefault()).toInstant());
 
         return JWT.create()
-                .withIssuer("EcommerceProduct")
+                .withIssuer("e-commerce-api")
                 .withSubject(user.getUsername())
                 .withClaim("document", user.getDocument())
                 .withExpiresAt(expiryDate).sign(Algorithm.HMAC256("SECRETA"));

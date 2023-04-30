@@ -3,9 +3,11 @@ package ecommerce.business.authentication.service;
 import org.slf4j.Logger;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.authentication.AuthenticationManager;
+
 import org.springframework.stereotype.Service;
 
 import ecommerce.business.authentication.entity.Login;
@@ -18,14 +20,18 @@ public class UserService {
     private static final Logger LOG = LoggerFactory.getLogger(User.class);
 
     private final UserRepository userRepository;
+
+    @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
     private TokenService tokenService;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    public User createUser(User user) {
+    public String createUser(User user) {
         if (user == null) {
             throw IException.ofValidation("USER_INVALID", "Usuário inválido.");
         }
@@ -51,7 +57,9 @@ public class UserService {
             throw IException.ofValidation("USER_CREATE_ERROR", "Erro ao registrar usuário.");
         }
 
-        return userInfo;
+        var menssage = "Usuário cadastrado com sucesso!";
+
+        return menssage;
     }
 
     public String login(Login login) {
@@ -59,7 +67,7 @@ public class UserService {
         Login.validate(login);
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                login.getEmail(), login.getPassword());
+                login.getUsername(), login.getPassword());
 
         Authentication authenticate = this.authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 

@@ -1,9 +1,5 @@
 package ecommerce.business.authentication.entity;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -13,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import ecommerce.utils.IException;
 import ecommerce.utils.Validator;
@@ -30,7 +27,7 @@ public class User implements UserDetails {
     private String password;
 
     public User(UUID id, String name, String document, String mobilePhone, String homePhone, String email,
-            String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+            String password) {
         if (id == null) {
             this.id = UUID.randomUUID();
         } else {
@@ -41,7 +38,9 @@ public class User implements UserDetails {
         this.mobilePhone = mobilePhone;
         this.homePhone = homePhone;
         this.email = email;
-        this.password = encriptPassword(password);
+
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        this.password = encoder.encode(password);
     }
 
     public UUID getId() {
@@ -124,11 +123,4 @@ public class User implements UserDetails {
             throw IException.ofValidation("HOME_PHONE_INVALID", "Número residencial inválido.");
         }
     }
-
-    public static String encriptPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest messageDigest =  MessageDigest.getInstance("SHA-256");
-        messageDigest.update(password.getBytes("UTF-8"));
-        return new BigInteger(1, messageDigest.digest()).toString(16);
-    }
-
 }

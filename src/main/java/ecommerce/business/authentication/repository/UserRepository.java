@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.context.annotation.Bean;
 
 import ecommerce.business.authentication.entity.User;
 

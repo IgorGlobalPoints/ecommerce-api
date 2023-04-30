@@ -22,9 +22,9 @@ public class UserAuthenticationController extends BaseController {
         super(executor);
         this.userService = userService;
     }
-    
+
     @PostMapping("/sign")
-    public CompletableFuture<ApiReturn<User>> createUser(@RequestBody User user) {
+    public CompletableFuture<ApiReturn<String>> createUser(@RequestBody User user) {
         return asyncResultOf(() -> this.userService.createUser(user));
     }
 
