@@ -2,6 +2,9 @@ package ecommerce.controllers;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +20,9 @@ import ecommerce.utils.BaseController;
 @RequestMapping("user/authentication")
 public class UserAuthenticationController extends BaseController {
     private final UserService userService;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserAuthenticationController(Executor executor, UserService userService) {
         super(executor);
@@ -25,6 +31,8 @@ public class UserAuthenticationController extends BaseController {
 
     @PostMapping("/sign")
     public CompletableFuture<ApiReturn<String>> createUser(@RequestBody User user) {
+        String encryptedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encryptedPassword);
         return asyncResultOf(() -> this.userService.createUser(user));
     }
 

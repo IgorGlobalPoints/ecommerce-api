@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.context.annotation.Bean;
 
 import ecommerce.business.authentication.entity.User;
 
@@ -21,7 +20,7 @@ public class UserRepository {
         return this.mongoTemplate.save(user, "Users");
     }
 
-    public User findUserByDcoument(String document) {
+    public User findUserByDocument(String document) {
         var query = new Query().addCriteria(where("document").is(document));
 
         return mongoTemplate.findOne(query, User.class);

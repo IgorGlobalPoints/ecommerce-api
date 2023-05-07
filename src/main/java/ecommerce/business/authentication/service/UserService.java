@@ -4,10 +4,7 @@ import org.slf4j.Logger;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import ecommerce.business.authentication.entity.Login;
@@ -22,10 +19,10 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private TokenService tokenService;
 
     @Autowired
-    private TokenService tokenService;
+    private PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -40,7 +37,7 @@ public class UserService {
 
         User userInfo;
         try {
-            userInfo = this.userRepository.findUserByDcoument(user.getDocument());
+            userInfo = this.userRepository.findUserByDocument(user.getDocument());
         } catch (RuntimeException ex) {
             LOG.error("Ocorreu um erro ao buscar usuário", ex);
             throw IException.ofValidation("ERROR_SEARCH_REGISTER_USER", "Erro ao buscar registro de usuário.");
@@ -66,13 +63,13 @@ public class UserService {
 
         Login.validate(login);
 
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                login.getUsername(), login.getPassword());
+        User user = userRepository.findUserByUsername(login.getUsername());
 
-        Authentication authenticate = this.authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-
-        var user = (User) authenticate.getPrincipal();
+        if (user == null || !passwordEncoder.matches(login.getPassword(), user.getPassword())) {
+            throw IException.ofValidation("USER_INVALID", "Usuário ou senha inválidos");
+        }
 
         return tokenService.genarateToken(user);
     }
+
 }
