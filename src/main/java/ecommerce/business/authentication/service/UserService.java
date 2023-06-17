@@ -28,7 +28,9 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public String createUser(User user) {
+    public User createUser(User user) {
+        LOG.info("Iniciando cadastro de novo usuário.");
+
         if (user == null) {
             throw IException.ofValidation("USER_INVALID", "Usuário inválido.");
         }
@@ -39,7 +41,7 @@ public class UserService {
         try {
             userInfo = this.userRepository.findUserByDocument(user.getDocument());
         } catch (RuntimeException ex) {
-            LOG.error("Ocorreu um erro ao buscar usuário", ex);
+            LOG.error("Ocorreu um erro ao buscar usuário {}", ex.getMessage());
             throw IException.ofValidation("ERROR_SEARCH_REGISTER_USER", "Erro ao buscar registro de usuário.");
         }
 
@@ -47,16 +49,14 @@ public class UserService {
             throw IException.ofValidation("USER_CREATE_ERROR", "Documento já cadastrado.");
         }
 
+        user.init();
+
         try {
-            userInfo = this.userRepository.createUser(user);
+            return this.userRepository.createUser(user);
         } catch (RuntimeException ex) {
-            LOG.error("Ocorreu um erro ao cadatrar novo usuário", ex);
+            LOG.error("Ocorreu um erro ao cadatrar novo usuário {}", ex.getMessage());
             throw IException.ofValidation("USER_CREATE_ERROR", "Erro ao registrar usuário.");
         }
-
-        var menssage = "Usuário cadastrado com sucesso!";
-
-        return menssage;
     }
 
     public String login(Login login) {

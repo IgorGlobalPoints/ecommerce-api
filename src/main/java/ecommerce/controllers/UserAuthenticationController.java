@@ -20,7 +20,7 @@ import ecommerce.utils.BaseController;
 @RequestMapping("user/authentication")
 public class UserAuthenticationController extends BaseController {
     private final UserService userService;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -30,7 +30,7 @@ public class UserAuthenticationController extends BaseController {
     }
 
     @PostMapping("/sign")
-    public CompletableFuture<ApiReturn<String>> createUser(@RequestBody User user) {
+    public CompletableFuture<ApiReturn<User>> createUser(@RequestBody User user) {
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encryptedPassword);
         return asyncResultOf(() -> this.userService.createUser(user));

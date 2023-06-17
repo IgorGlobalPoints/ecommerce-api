@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import ecommerce.business.products.entity.EcommerceProduct;
-import ecommerce.business.products.entity.ResumedEcommerceProduct;
-import ecommerce.business.products.entity.ResumedEcommerceProducts;
 import ecommerce.business.products.service.EcommerceProductService;
 import ecommerce.utils.ApiReturn;
 import ecommerce.utils.BaseController;
@@ -24,35 +22,35 @@ import ecommerce.utils.BaseController;
 @RestController
 @RequestMapping("ecommerce/products")
 public class EcommerceProductsController extends BaseController {
-    private final EcommerceProductService productService;
+    private final EcommerceProductService ecommerceProductService;
 
-    public EcommerceProductsController(Executor executor, EcommerceProductService productService) {
+    public EcommerceProductsController(Executor executor, EcommerceProductService ecommerceProductService) {
         super(executor);
-        this.productService = productService;
+        this.ecommerceProductService = ecommerceProductService;
     }
 
     @PostMapping("/register")
     public CompletableFuture<ApiReturn<EcommerceProduct>> registerProduct(
-            @RequestBody EcommerceProduct productDetails) {
-        return asyncResultOf(() -> this.productService.registerProduct(productDetails));
+            @RequestBody EcommerceProduct ecommerceProduct) {
+        return asyncResultOf(() -> this.ecommerceProductService.registerProduct(ecommerceProduct));
     }
 
     @GetMapping
-    public CompletableFuture<ApiReturn<List<ResumedEcommerceProducts>>> findProducts(
+    public CompletableFuture<ApiReturn<List<EcommerceProduct>>> findProducts(
             @RequestParam(required = false) boolean active, @RequestParam(required = false) String category,
             @RequestParam(required = false) UUID productId, @RequestParam(required = false) String name) {
-        return asyncResultOf(() -> this.productService.findProducts(active, category, productId, name));
+        return asyncResultOf(() -> this.ecommerceProductService.findProducts(active, category, productId, name));
     }
 
-    @GetMapping("/{productId}")
-    public CompletableFuture<ApiReturn<ResumedEcommerceProduct>> findProductById(
-            @PathVariable UUID productId) {
-        return asyncResultOf(() -> this.productService.findProductById(productId));
+    @GetMapping("/{id}")
+    public CompletableFuture<ApiReturn<EcommerceProduct>> findProductById(
+            @PathVariable UUID id) {
+        return asyncResultOf(() -> this.ecommerceProductService.findProductById(id));
     }
 
-    @PutMapping("/update/{productId}")
-    public CompletableFuture<ApiReturn<Boolean>> updateProduct(@PathVariable UUID productId,
-            @RequestBody ResumedEcommerceProduct productDetails) {
-        return asyncResultOf(() -> this.productService.updateProduct(productDetails, productId));
+    @PutMapping("/update/{id}")
+    public CompletableFuture<ApiReturn<Boolean>> updateProduct(@PathVariable UUID id,
+            @RequestBody EcommerceProduct ecommerceProduct) {
+        return asyncResultOf(() -> this.ecommerceProductService.updateProduct(ecommerceProduct, id));
     }
 }

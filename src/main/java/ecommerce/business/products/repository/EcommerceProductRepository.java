@@ -11,8 +11,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import ecommerce.business.products.entity.EcommerceProduct;
-import ecommerce.business.products.entity.ResumedEcommerceProduct;
-import ecommerce.business.products.entity.ResumedEcommerceProducts;
 import ecommerce.utils.UpdateVerify;
 import ecommerce.utils.Validator;
 
@@ -34,7 +32,7 @@ public class EcommerceProductRepository {
         return mongoTemplate.exists(query, EcommerceProduct.class);
     }
 
-    public List<ResumedEcommerceProducts> findProducts(boolean active, String category, UUID productId, String name) {
+    public List<EcommerceProduct> findProducts(boolean active, String category, UUID productId, String name) {
 
         var query = new Query();
 
@@ -62,26 +60,26 @@ public class EcommerceProductRepository {
                 .include("quantity")
                 .include("createDate");
 
-        return this.mongoTemplate.find(query, ResumedEcommerceProducts.class);
+        return this.mongoTemplate.find(query, EcommerceProduct.class);
     }
 
-    public ResumedEcommerceProduct findProducById(UUID productId) {
+    public EcommerceProduct findProducById(UUID productId) {
         var query = new Query().addCriteria(where("id").is(productId));
 
         query.fields()
-        .include("id")
-        .include("name")
-        .include("price")
-        .include("description")
-        .include("imageUrl")
-        .include("category")
-        .include("active")
-        .include("quantity");
+                .include("id")
+                .include("name")
+                .include("price")
+                .include("description")
+                .include("imageUrl")
+                .include("category")
+                .include("active")
+                .include("quantity");
 
-        return this.mongoTemplate.findOne(query, ResumedEcommerceProduct.class);
+        return this.mongoTemplate.findOne(query, EcommerceProduct.class);
     }
 
-    public boolean updateProduct(ResumedEcommerceProduct productDetails, UUID productId) {
+    public Boolean updateProduct(EcommerceProduct productDetails, UUID productId) {
 
         var query = new Query()
                 .addCriteria(where("_id").is(productId));
@@ -95,7 +93,7 @@ public class EcommerceProductRepository {
                 .set("quantity", productDetails.getQuantity())
                 .currentDate("updateDate");
 
-        var result = this.mongoTemplate.updateFirst(query, update, ResumedEcommerceProduct.class);
+        var result = this.mongoTemplate.updateFirst(query, update, EcommerceProduct.class);
 
         return UpdateVerify.wasUpdated(result);
     }
