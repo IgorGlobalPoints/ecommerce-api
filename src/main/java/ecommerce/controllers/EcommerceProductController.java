@@ -21,10 +21,10 @@ import ecommerce.utils.BaseController;
 
 @RestController
 @RequestMapping("ecommerce/products")
-public class EcommerceProductsController extends BaseController {
+public class EcommerceProductController extends BaseController {
     private final EcommerceProductService ecommerceProductService;
 
-    public EcommerceProductsController(Executor executor, EcommerceProductService ecommerceProductService) {
+    public EcommerceProductController(Executor executor, EcommerceProductService ecommerceProductService) {
         super(executor);
         this.ecommerceProductService = ecommerceProductService;
     }
