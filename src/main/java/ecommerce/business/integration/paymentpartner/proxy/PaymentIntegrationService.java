@@ -1,13 +1,19 @@
 package ecommerce.business.integration.paymentpartner.proxy;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.common.IdentificationRequest;
 import com.mercadopago.client.payment.PaymentClient;
 import com.mercadopago.client.payment.PaymentCreateRequest;
 import com.mercadopago.client.payment.PaymentPayerRequest;
+import com.mercadopago.core.MPRequestOptions;
 import com.mercadopago.resources.payment.Payment;
 
 import ecommerce.utils.IException;
@@ -18,16 +24,28 @@ public class PaymentIntegrationService {
 
     private final PaymentClient paymentIntegration;
 
+    @Value("${mercado-pago.access-token}")
+    private static String access_token;
+
     public PaymentIntegrationService(PaymentClient paymentClient) {
         this.paymentIntegration = paymentClient;
     }
 
     public Payment createCreditDebitPayment(Payment payment) {
-        LOG.info("criando pagamento de crédito/débito");
+        LOG.info("criando pagamento de crédito/débito {}", payment.getPayer().getEmail());
 
         try {
-            var paymentCreate = buildPayment(payment);
-            return paymentIntegration.create(paymentCreate);
+            MercadoPagoConfig.setAccessToken(access_token);
+
+            Map<String, String> customHeaders = new HashMap<>();
+            customHeaders.put("x-idempotency-key", payment.getPayer().getId());
+
+            MPRequestOptions requestOptions = MPRequestOptions.builder()
+            .customHeaders(customHeaders)
+            .build();
+
+            var buildPayment = buildPayment(payment);
+            return paymentIntegration.create(buildPayment, requestOptions);
         } catch (Exception e) {
             LOG.error("Ocorreu um erro ao tentar realizar o pagamento {}", e.getMessage());
             throw IException.ofError("CREATE_PAYMENT_ERROR", "Ocorreu um erro ao tentar realizar o pagamento");
@@ -35,7 +53,7 @@ public class PaymentIntegrationService {
     }
 
     private PaymentCreateRequest buildPayment(Payment payment) {
-        LOG.info("construindo pagamento");
+        LOG.info("construindo pagamento {}", payment.getPayer().getEmail());
         var payer = buildPayer(payment);
 
         return PaymentCreateRequest.builder()
@@ -49,7 +67,7 @@ public class PaymentIntegrationService {
     }
 
     private PaymentPayerRequest buildPayer(Payment payment) {
-        LOG.info("construindo dados do pagador");
+        LOG.info("construindo dados do pagador {}", payment.getPayer().getEmail());
         var identification = buildIdentification(payment);
 
         return PaymentPayerRequest.builder()
@@ -60,7 +78,7 @@ public class PaymentIntegrationService {
     }
 
     private IdentificationRequest buildIdentification(Payment payment) {
-        LOG.info("construindo dados da identificação");
+        LOG.info("construindo dados da identificação {}", payment.getPayer().getEmail());
         return IdentificationRequest.builder()
                 .type(payment.getPayer().getIdentification().getType())
                 .number(payment.getPayer().getIdentification().getNumber())
